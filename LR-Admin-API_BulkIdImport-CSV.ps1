@@ -125,7 +125,7 @@ foreach ($Entry in $CSVDoc)
     
     Write-Host $IdJSON
     #Add Identity to default Entity
-    #$result = Invoke-WebRequest -Uri https://$apiURL/lr-admin-api/identities/bulk?entityID=1 -Headers @{"Authorization" = "Bearer $token"} -ContentType 'application/json' -Method Post -Body $IdJSON
+    $result = Invoke-WebRequest -Uri https://$apiURL/lr-admin-api/identities/bulk?entityID=1 -Headers @{"Authorization" = "Bearer $token"} -ContentType 'application/json' -Method Post -Body $IdJSON
     
-    #Write-host $result 
+    Write-host $result 
 }
