@@ -1,4 +1,4 @@
-﻿Function TrustAllCerts
+Function TrustAllCerts
 {
 add-type @"
     using System.Net;
@@ -56,9 +56,15 @@ Function BuildJSON
         [string]$first,
         [string]$middle,
         [string]$last,
-        [string]$username
+        [string]$username,
+        [string]$title
     )
-
+    $GUID = [guid]::NewGuid()
+    $source = @()
+    $source += [pscustomobject]@{
+        "AccountName" = "$first $middle $last"
+        "IAMName" = "CSV"
+    }
     $identifiers = @()
     $identifiers += [pscustomobject]@{
         "identifierType" = "Login"
@@ -68,14 +74,22 @@ Function BuildJSON
 
     $accounts = @()
     $accounts += [pscustomobject]@{
-        "vendorUniqueKey" = "1"
+        "thumbnailPhoto" = ""
+        "vendorUniqueKey" = $GUID
         "hasOwnerIdentity" = $true
         "hasSameRootEntityAsTarget" = $true
         "isPrimary" = $true
         "accountType" = "Custom"
+        "login" = "$username"
         "nameFirst" = "$first"
         "nameMiddle" = "$middle"
         "nameLast"= "$last"
+        #"company" = ""
+        #"department" = "string"
+        "title" = "$title"
+        #"manager" = "string"
+        #"addressCity" = "string"
+        #"domainName" = "string"
         "identifiers" = $identifiers
     }
 
@@ -97,11 +111,11 @@ $token = Read-Host -Prompt "Please input API Token genrated from Client Console"
 $PMHost = Read-Host -Prompt "Please input PM Host IP/Name (localhost) to keep default hit Enter"
 if($PMHost -eq "")
 {
-    $apiUrl = "localhost:8505"
+    $apiUrl = "http://localhost:8505"
 }
 else
 {
-    $apiUrl = $PMHost + ":8505"
+    $apiUrl = "https://" + $PMHost + ":8501"
     TrustAllCerts
 }
 Write-Host $apiUrl
@@ -120,12 +134,13 @@ foreach ($Entry in $CSVDoc)
     [string]$M = $($Entry.Middlename)
     [string]$L = $($Entry.Lastname)
     [string]$U = $($Entry.Username)
+    [string]$T = $($Entry.Title)
     
-    $IdJSON = BuildJSON $F $M $L $U
+    $IdJSON = BuildJSON $F $M $L $U $T
     
     Write-Host $IdJSON
     #Add Identity to default Entity
-    $result = Invoke-WebRequest -Uri https://$apiURL/lr-admin-api/identities/bulk?entityID=1 -Headers @{"Authorization" = "Bearer $token"} -ContentType 'application/json' -Method Post -Body $IdJSON
+    $result = Invoke-WebRequest -Uri $apiURL/lr-admin-api/identities/bulk?entityID=1 -Headers @{"Authorization" = "Bearer $token"} -ContentType 'application/json' -Method Post -Body $IdJSON
     
     Write-host $result 
 }
