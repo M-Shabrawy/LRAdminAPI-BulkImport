@@ -69,7 +69,8 @@ Function BuildJSON
     $identifiers += [pscustomobject]@{
         "identifierType" = "Login"
         "value" = "$username"
-        "recordStatus"= "New"
+        "recordStatus" = "New"
+		"source" = $source 
     }
 
     $accounts = @()
